@@ -1,8 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: 'export',
-  distDir: 'dist',
+  // Remove output: 'export' for Vercel deployment
+  // output: 'export',
+  // distDir: 'dist',
 };
 
 export default nextConfig;
