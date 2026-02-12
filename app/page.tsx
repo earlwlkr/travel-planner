@@ -1,0 +1,289 @@
+'use client';
+
+import { useState } from 'react';
+import { MapPin, Calendar, Sparkles, Loader2, Plane, Hotel, Utensils, Camera } from 'lucide-react';
+
+interface ItineraryDay {
+  day: number;
+  activities: string[];
+}
+
+interface DestinationInfo {
+  name: string;
+  description: string;
+  highlights: string[];
+  itinerary: ItineraryDay[];
+}
+
+const mockDestinations: Record<string, DestinationInfo> = {
+  'singapore': {
+    name: 'Singapore',
+    description: 'A vibrant city-state known for its modern skyline, diverse culture, and world-class attractions.',
+    highlights: [
+      'Marina Bay Sands & Gardens by the Bay',
+      'Sentosa Island & Universal Studios',
+      'Chinatown & Little India',
+      'Orchard Road Shopping',
+      'Hawker Centers & Local Cuisine'
+    ],
+    itinerary: [
+      { day: 1, activities: ['Arrival & Check-in', 'Marina Bay Sands', 'Gardens by the Bay', 'Supertree Grove Light Show'] },
+      { day: 2, activities: ['Sentosa Island', 'S.E.A. Aquarium', 'Beaches & Resorts', 'Cable Car Ride'] },
+      { day: 3, activities: ['Chinatown Food Tour', 'Buddha Tooth Relic Temple', 'Clarke Quay', 'Singapore River Cruise'] },
+    ]
+  },
+  'malaysia': {
+    name: 'Malaysia',
+    description: 'A diverse country offering a mix of modern cities, colonial architecture, rainforests, and beautiful beaches.',
+    highlights: [
+      'Petronas Towers in Kuala Lumpur',
+      'George Town Street Art',
+      'Cameron Highlands Tea Plantations',
+      'Langkawi Beaches',
+      'Diverse Local Cuisine'
+    ],
+    itinerary: [
+      { day: 1, activities: ['Arrival in Kuala Lumpur', 'Petronas Towers', 'KLCC Park', 'Bukit Bintang Shopping'] },
+      { day: 2, activities: ['Batu Caves', 'Central Market', 'Chinatown (Petaling Street)', 'Jalan Alor Food Street'] },
+      { day: 3, activities: ['Day Trip to Genting Highlands', 'Cable Car Ride', 'Theme Park', 'Casino & Entertainment'] },
+    ]
+  },
+  'japan': {
+    name: 'Japan',
+    description: 'A fascinating blend of ancient traditions and cutting-edge modern technology.',
+    highlights: [
+      'Tokyo\'s Shibuya & Shinjuku',
+      'Kyoto Temples & Shrines',
+      'Mount Fuji Views',
+      'Osaka Street Food',
+      'Bullet Train Experience'
+    ],
+    itinerary: [
+      { day: 1, activities: ['Arrival in Tokyo', 'Shibuya Crossing', 'Meiji Shrine', 'Tokyo Tower'] },
+      { day: 2, activities: ['Asakusa & Senso-ji Temple', 'Akihabara', 'Ueno Park', 'Shinjuku Nightlife'] },
+      { day: 3, activities: ['Day Trip to Mount Fuji', 'Lake Kawaguchi', 'Hot Springs (Onsen)', 'Chureito Pagoda'] },
+    ]
+  },
+  'thailand': {
+    name: 'Thailand',
+    description: 'The Land of Smiles, famous for its tropical beaches, ornate temples, and vibrant street life.',
+    highlights: [
+      'Grand Palace & Wat Pho',
+      'Phuket Beaches',
+      'Chiang Mai Temples',
+      'Floating Markets',
+      'Thai Street Food'
+    ],
+    itinerary: [
+      { day: 1, activities: ['Arrival in Bangkok', 'Grand Palace', 'Wat Pho (Reclining Buddha)', 'Wat Arun Sunset'] },
+      { day: 2, activities: ['Chatuchak Weekend Market', 'Jim Thompson House', 'Asiatique Riverfront', 'Khao San Road'] },
+      { day: 3, activities: ['Damnoen Saduak Floating Market', 'Maeklong Railway Market', 'Ayutthaya Day Trip', 'River Cruise'] },
+    ]
+  }
+};
+
+export default function Home() {
+  const [destination, setDestination] = useState('');
+  const [days, setDays] = useState(3);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<DestinationInfo | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const normalizedDest = destination.toLowerCase().trim();
+    const destinationData = mockDestinations[normalizedDest] || {
+      name: destination.charAt(0).toUpperCase() + destination.slice(1),
+      description: `A wonderful destination waiting to be explored! Here's a suggested itinerary for ${days} days.`,
+      highlights: [
+        'Local Landmarks & Attractions',
+        'Cultural Sites & Museums',
+        'Famous Local Cuisine',
+        'Shopping Districts',
+        'Natural Scenery'
+      ],
+      itinerary: Array.from({ length: days }, (_, i) => ({
+        day: i + 1,
+        activities: [
+          'Explore local attractions',
+          'Try authentic local cuisine',
+          'Visit cultural sites',
+          'Shopping & leisure time'
+        ]
+      }))
+    };
+
+    // Adjust itinerary to match requested days
+    if (destinationData.itinerary.length !== days) {
+      destinationData.itinerary = Array.from({ length: days }, (_, i) => ({
+        day: i + 1,
+        activities: destinationData.itinerary[i]?.activities || [
+          'Explore local attractions',
+          'Try authentic local cuisine',
+          'Visit cultural sites',
+          'Shopping & leisure time'
+        ]
+      }));
+    }
+
+    setResult(destinationData);
+    setLoading(false);
+  };
+
+  return (
+    <main className="container mx-auto px-4 py-12 max-w-4xl">
+      {/* Header */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+          <Plane className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          Travel Planner
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Plan your perfect trip with personalized itinerary suggestions
+        </p>
+      </div>
+
+      {/* Input Form */}
+      <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <MapPin className="inline w-4 h-4 mr-1" />
+              Destination
+            </label>
+            <input
+              type="text"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="e.g., Singapore, Malaysia, Japan, Thailand"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              required
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              Try: Singapore, Malaysia, Japan, or Thailand
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Calendar className="inline w-4 h-4 mr-1" />
+              Number of Days
+            </label>
+            <div className="flex items-center space-x-4">
+              <input
+                type="range"
+                min="1"
+                max="14"
+                value={days}
+                onChange={(e) => setDays(parseInt(e.target.value))}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-2xl font-bold text-blue-600 w-12 text-center">
+                {days}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !destination.trim()}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Planning your trip...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                <span>Generate Itinerary</span>
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+
+      {/* Results */}
+      {result && (
+        <div className="bg-white rounded-2xl shadow-xl p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Your {result.name} Adventure
+          </h2>
+          <p className="text-gray-600 mb-6">
+            {result.description}
+          </p>
+
+          {/* Highlights */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Camera className="w-5 h-5 mr-2 text-blue-600" />
+              Notable Places to Visit
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {result.highlights.map((highlight, index) => (
+                <div
+                  key={index}
+                  className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg"
+                >
+                  <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                  <span className="text-gray-700">{highlight}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Itinerary */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <Hotel className="w-5 h-5 mr-2 text-blue-600" />
+              Your {days}-Day Itinerary
+            </h3>
+            <div className="space-y-4">
+              {result.itinerary.map((day) => (
+                <div
+                  key={day.day}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center mb-3">
+                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm mr-3">
+                      {day.day}
+                    </div>
+                    <h4 className="font-semibold text-gray-900">
+                      Day {day.day}
+                    </h4>
+                  </div>
+                  <ul className="space-y-2 ml-11">
+                    {day.activities.map((activity, idx) => (
+                      <li key={idx} className="flex items-start space-x-2">
+                        <Utensils className="w-4 h-4 text-gray-400 mt-0.5" />
+                        <span className="text-gray-600">{activity}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tips */}
+          <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-semibold text-blue-900 mb-2">💡 Travel Tips</h4>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• Book accommodations in advance for better rates</li>
+              <li>• Check local weather before packing</li>
+              <li>• Download offline maps for easy navigation</li>
+              <li>• Try local street food for authentic experiences</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}
